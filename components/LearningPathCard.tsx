@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreHorizontal, ArrowRight, X, Edit2, Trash2, Plus, GripVertical, Save, XCircle, CheckCircle2, Circle } from 'lucide-react';
+import { MoreHorizontal, ArrowRight, X, Edit2, Trash2, Plus, GripVertical, Save, XCircle, CheckCircle2, Circle, FastForward, Play } from 'lucide-react';
 import Image from 'next/image';
 
 type Course = {
@@ -10,12 +10,15 @@ type Course = {
   title: string;
   duration: string;
   completed?: boolean;
+  skipped?: boolean;
   description?: string;
 };
 
 export default function LearningPathCard() {
   const router = useRouter();
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [completionMessage, setCompletionMessage] = useState<string | null>(null);
   
   const [courses, setCourses] = useState<Course[]>([
     { id: '1', title: 'Introduction to CI/CD', duration: '2h', completed: true, description: 'Learn the fundamentals of Continuous Integration and Continuous Deployment.' },
@@ -29,6 +32,8 @@ export default function LearningPathCard() {
   const [editDuration, setEditDuration] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [durationError, setDurationError] = useState(false);
+  
+  const [draggedCourseId, setDraggedCourseId] = useState<string | null>(null);
 
   const handleDelete = (id: string) => {
     setCourses(courses.filter(c => c.id !== id));
@@ -95,22 +100,77 @@ export default function LearningPathCard() {
     setDurationError(false);
   };
 
-  const completedCount = courses.filter(c => c.completed).length;
-  const progressPercentage = courses.length ? Math.round((completedCount / courses.length) * 100) : 0;
+  const markCompleted = (courseId: string, completed: boolean) => {
+    setCourses(courses.map(c => c.id === courseId ? { ...c, completed, skipped: false } : c));
+    if (completed) {
+      setCompletionMessage('Course completed! 🎉');
+      setTimeout(() => setCompletionMessage(null), 3000);
+    }
+  };
+
+  const markSkipped = (courseId: string, skipped: boolean) => {
+    setCourses(courses.map(c => c.id === courseId ? { ...c, skipped, completed: false } : c));
+  };
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedCourseId(id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    if (!draggedCourseId || draggedCourseId === id) return;
+    
+    const draggedIdx = courses.findIndex(c => c.id === draggedCourseId);
+    const dropIdx = courses.findIndex(c => c.id === id);
+    
+    const newCourses = [...courses];
+    const [draggedItem] = newCourses.splice(draggedIdx, 1);
+    newCourses.splice(dropIdx, 0, draggedItem);
+    setCourses(newCourses);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedCourseId(null);
+  };
+
+  // We consider both completed and skipped as progress
+  const progressCount = courses.filter(c => c.completed || c.skipped).length;
+  const progressPercentage = courses.length ? Math.round((progressCount / courses.length) * 100) : 0;
   const dashArray = 263.89; // 2 * pi * 42
   const dashOffset = dashArray - (dashArray * progressPercentage) / 100;
 
   return (
     <>
       <article 
-        onClick={() => router.push('/path/devops-roadmap')}
-        className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 transition-all duration-300 group flex flex-col h-[420px] cursor-pointer"
+        onClick={() => !isPlaying && router.push('/path/devops-roadmap')}
+        className={`bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-300 group flex flex-col h-[420px] ${!isPlaying ? 'hover:-translate-y-1.5 cursor-pointer' : ''}`}
       >
         {/* Card Header / Banner */}
-        <div className="h-[120px] bg-gradient-to-br from-indigo-500 to-purple-600 relative p-4 flex-shrink-0 transition-colors duration-500 group-hover:from-indigo-600 group-hover:to-purple-700">
+        <div className="h-[140px] bg-slate-900 relative flex-shrink-0">
+          {isPlaying ? (
+            <video 
+              src="https://www.w3schools.com/html/mov_bbb.mp4" 
+              controls 
+              autoPlay 
+              className="w-full h-full object-cover" 
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 transition-colors duration-500 group-hover:from-indigo-600 group-hover:to-purple-700 relative p-4 flex items-center justify-center">
+              <button 
+                onClick={(e) => { e.stopPropagation(); setIsPlaying(true); }}
+                className="bg-white/20 p-4 rounded-full cursor-pointer hover:bg-white/40 hover:scale-110 text-white backdrop-blur-sm transition-all shadow-lg"
+                title="Play Intro Video"
+              >
+                <Play className="w-6 h-6 fill-white" />
+              </button>
+            </div>
+          )}
+          
           <button 
             onClick={(e) => { e.stopPropagation(); setIsManageModalOpen(true); }}
-            className="absolute top-4 right-4 bg-white/20 p-2 rounded-full cursor-pointer hover:bg-white/40 text-white backdrop-blur-sm transition-colors"
+            className={`absolute top-4 right-4 p-2 rounded-full cursor-pointer text-white backdrop-blur-sm transition-colors ${isPlaying ? 'bg-black/40 hover:bg-black/60' : 'bg-white/20 hover:bg-white/40'}`}
             title="Manage Courses"
           >
             <MoreHorizontal className="w-5 h-5" />
@@ -118,7 +178,7 @@ export default function LearningPathCard() {
         </div>
         
         {/* Card Content */}
-        <div className="p-6 pt-[52px] relative flex-grow flex flex-col">
+        <div className="p-6 pt-[52px] relative flex-grow flex flex-col bg-white">
           {/* Circular Progress */}
           <div className="absolute left-6 bg-white rounded-full p-1.5 shadow-sm border border-slate-100 flex items-center justify-center w-[76px] h-[76px] -top-10 transition-transform duration-300 group-hover:scale-110">
             <div className="relative w-full h-full flex items-center justify-center">
@@ -167,7 +227,7 @@ export default function LearningPathCard() {
             <div className="mt-4">
               <div className="flex justify-between items-center text-xs font-semibold text-slate-500 mb-2">
                 <span>Modules</span>
-                <span className="text-blue-600">{completedCount} of {courses.length} completed</span>
+                <span className="text-blue-600">{progressCount} of {courses.length} completed</span>
               </div>
               <div className="flex gap-1.5 h-1.5 w-full">
                 {courses.map((course) => (
@@ -176,7 +236,7 @@ export default function LearningPathCard() {
                     className={`flex-1 rounded-full bg-slate-100 overflow-hidden relative`}
                   >
                      <div 
-                      className={`absolute inset-0 bg-blue-600 rounded-full transition-all duration-500 origin-left ${course.completed ? 'scale-x-100' : 'scale-x-0'}`} 
+                      className={`absolute inset-0 rounded-full transition-all duration-500 origin-left ${course.completed ? 'bg-blue-600 scale-x-100' : course.skipped ? 'bg-amber-400 scale-x-100' : 'bg-blue-600 scale-x-0'}`} 
                      />
                   </div>
                 ))}
@@ -199,7 +259,7 @@ export default function LearningPathCard() {
               
               {/* Continue Button */}
               <button 
-                onClick={(e) => { e.stopPropagation(); /* Continue logic */ }}
+                onClick={(e) => { e.stopPropagation(); /* Continue logic */ router.push('/path/devops-roadmap'); }}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm group-hover:shadow-md group-hover:px-6 duration-300"
               >
                 Continue
@@ -213,7 +273,16 @@ export default function LearningPathCard() {
       {/* Course Management Modal Overlay */}
       {isManageModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6 transition-opacity">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[80vh]">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[80vh] relative">
+            
+            {/* Completion Success Banner */}
+            {completionMessage && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-full font-bold shadow-xl animate-in slide-in-from-top-4 fade-in duration-300 z-20 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 fill-white text-green-600" />
+                {completionMessage}
+              </div>
+            )}
+
             {/* Modal Header */}
             <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
@@ -232,7 +301,19 @@ export default function LearningPathCard() {
             <div className="flex-grow overflow-y-auto p-6 bg-slate-50/30">
               <div className="space-y-3">
                 {courses.map((course) => (
-                  <div key={course.id} className={`bg-white border rounded-xl p-4 shadow-sm hover:border-slate-300 transition-colors group/row flex items-start gap-4 ${course.completed ? 'border-green-100 bg-green-50/50' : 'border-slate-200'}`}>
+                  <div 
+                    key={course.id} 
+                    draggable={editingId !== course.id}
+                    onDragStart={(e) => handleDragStart(e, course.id)}
+                    onDragOver={(e) => handleDragOver(e, course.id)}
+                    onDragEnd={handleDragEnd}
+                    className={`bg-white border rounded-xl p-4 shadow-sm transition-all group/row flex items-start gap-4 
+                      ${course.completed ? 'border-green-200 bg-green-50' : ''} 
+                      ${course.skipped ? 'border-amber-200 bg-amber-50/50 grayscale-[0.2]' : ''}
+                      ${!course.completed && !course.skipped ? 'border-slate-200 hover:border-slate-300' : ''}
+                      ${draggedCourseId === course.id ? 'opacity-40 scale-[0.98]' : 'opacity-100'} 
+                      ${editingId === course.id ? 'ring-2 ring-blue-100' : ''}`}
+                  >
                     <div className="mt-1 text-slate-300 cursor-grab active:cursor-grabbing hover:text-slate-500">
                       <GripVertical className="w-5 h-5" />
                     </div>
@@ -286,17 +367,27 @@ export default function LearningPathCard() {
                            {course.completed && (
                              <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
                            )}
+                           {course.skipped && (
+                             <FastForward className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                           )}
+                           {(!course.completed && !course.skipped) && (
+                             <Circle className="w-4 h-4 text-slate-300 flex-shrink-0" />
+                           )}
                            <div>
-                             <h4 className="text-sm font-semibold text-slate-900">{course.title}</h4>
+                             <h4 className={`text-sm font-semibold ${course.completed || course.skipped ? 'text-slate-700' : 'text-slate-900'}`}>{course.title}</h4>
                              <p className="text-xs font-medium text-slate-500 mt-1">{course.duration}</p>
                            </div>
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
                            <button 
-                             onClick={() => {
-                               // Toggle complete status logic
-                               setCourses(courses.map(c => c.id === course.id ? { ...c, completed: !c.completed } : c));
-                             }}
+                             onClick={() => markSkipped(course.id, !course.skipped)}
+                             className={`p-2 rounded-lg transition-colors ${course.skipped ? 'text-amber-600 bg-amber-100 hover:bg-amber-200' : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'}`}
+                             title={course.skipped ? 'Unskip course' : 'Skip course'}
+                           >
+                             <FastForward className="w-4 h-4" />
+                           </button>
+                           <button 
+                             onClick={() => markCompleted(course.id, !course.completed)}
                              className={`p-2 rounded-lg transition-colors ${course.completed ? 'text-green-600 bg-green-100 hover:bg-green-200' : 'text-slate-400 hover:text-green-600 hover:bg-green-50'}`}
                              title={course.completed ? 'Mark incomplete' : 'Mark completed'}
                            >

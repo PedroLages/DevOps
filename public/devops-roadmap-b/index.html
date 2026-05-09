@@ -76,10 +76,21 @@
         <h1 class="text-5xl lg:text-6xl font-bold tracking-tighter text-white mb-6 font-sans">
           DevOps <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon to-blue-500">Roadmap</span>
         </h1>
-        <p class="text-slate-400 text-lg max-w-2xl font-mono leading-relaxed mb-10">
+        <p class="text-slate-400 text-lg max-w-2xl font-mono leading-relaxed mb-8">
           > initialized sequence: 4 critical modules.<br>
           > objective: master infrastructure, CI/CD, and kubernetes scaling.
         </p>
+
+        <!-- Linear Progress Bar -->
+        <div class="mb-8 w-full">
+          <div class="flex justify-between items-center text-xs font-mono text-neon mb-2">
+            <span>[PROGRESS]</span>
+            <span id="hero-progress-text">0%</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5">
+            <div id="hero-progress-bar" class="bg-neon h-1.5 rounded-full shadow-[0_0_10px_rgba(0,240,255,0.8)] transition-all duration-1000" style="width: 0%"></div>
+          </div>
+        </div>
 
         <!-- Stats Bar -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-1 bg-dark rounded-xl border border-slate-800">

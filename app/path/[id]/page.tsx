@@ -1,19 +1,29 @@
+'use client';
+
+import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import { ArrowLeft, CheckCircle2, Circle, Clock, PlayCircle, Trophy, BookOpen, Layers, Target, Check, Award, Video } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Circle, Clock, PlayCircle, Trophy, BookOpen, Layers, Target, Check, Award, Video, Lock } from 'lucide-react';
 import Link from 'next/link';
 
 // Mock data (since we're generating a static path page for demonstration)
-const modules = [
-  { id: '1', title: 'Introduction to CI/CD', duration: '2h', completed: true, description: 'Learn the fundamentals of Continuous Integration and Continuous Deployment. We will cover the history, benefits, and core concepts behind automated pipelines.' },
-  { id: '2', title: 'Docker Basics', duration: '3h 15m', completed: false, description: 'Containerize your applications with Docker. Understand images, containers, volumes, and networks to build portable environments.' },
-  { id: '3', title: 'Kubernetes Orchestration', duration: '5h', completed: false, description: 'Manage containerized applications at scale using Kubernetes. Dive into pods, deployments, services, and ingress controllers.' },
-  { id: '4', title: 'Infrastructure as Code', duration: '4h 30m', completed: false, description: 'Automate infrastructure provisioning with tools like Terraform. Learn to define your cloud environments as version-controlled code.' },
+const initialModules = [
+  { id: '1', title: 'Introduction to CI/CD', duration: '2h', lessons: 8, completed: true, description: 'Learn the fundamentals of Continuous Integration and Continuous Deployment. We will cover the history, benefits, and core concepts behind automated pipelines.' },
+  { id: '2', title: 'Docker Basics', duration: '3h 15m', lessons: 12, completed: false, description: 'Containerize your applications with Docker. Understand images, containers, volumes, and networks to build portable environments.' },
+  { id: '3', title: 'Kubernetes Orchestration', duration: '5h', lessons: 18, completed: false, description: 'Manage containerized applications at scale using Kubernetes. Dive into pods, deployments, services, and ingress controllers.' },
+  { id: '4', title: 'Infrastructure as Code', duration: '4h 30m', lessons: 10, completed: false, description: 'Automate infrastructure provisioning with tools like Terraform. Learn to define your cloud environments as version-controlled code.' },
 ];
 
 export default function PathDetails() {
+  const [modules, setModules] = useState(initialModules);
   const completedCount = modules.filter(m => m.completed).length;
   const progressPercentage = Math.round((completedCount / modules.length) * 100);
+
+  const toggleModuleCompletion = (id: string) => {
+    setModules(modules.map(m => 
+      m.id === id ? { ...m, completed: !m.completed } : m
+    ));
+  };
 
   return (
     <>
@@ -25,7 +35,7 @@ export default function PathDetails() {
           {/* Hero Banner */}
           <div className="bg-gradient-to-br from-indigo-600 to-purple-800 text-white pt-8 pb-20 px-8 lg:px-12">
             <div className="max-w-6xl mx-auto">
-              <Link href="/" className="inline-flex items-center gap-2 text-indigo-100 hover:text-white transition-colors mb-8 font-medium text-sm w-fit">
+              <Link href="/paths" className="inline-flex items-center gap-2 text-indigo-100 hover:text-white transition-colors mb-8 font-medium text-sm w-fit">
                 <ArrowLeft className="w-4 h-4" />
                 Back to Learning Paths
               </Link>
@@ -45,6 +55,17 @@ export default function PathDetails() {
                   <p className="text-indigo-100 text-lg leading-relaxed mb-8">
                     Master the tools and practices for modern infrastructure, CI/CD pipelines, and cloud-native deployments. This journey starts with CI/CD fundamentals and goes all the way through advanced Kubernetes orchestration.
                   </p>
+
+                  {/* Hero Progress Bar */}
+                  <div className="mb-8 w-full">
+                    <div className="flex justify-between items-center text-sm font-medium text-indigo-200 mb-2">
+                      <span>Overall Progress</span>
+                      <span>{progressPercentage}%</span>
+                    </div>
+                    <div className="w-full bg-indigo-900/40 rounded-full h-2.5">
+                      <div className="bg-blue-400 h-2.5 rounded-full transition-all duration-1000" style={{ width: `${progressPercentage}%` }}></div>
+                    </div>
+                  </div>
                   
                   <div className="flex items-center gap-4">
                     <button className="bg-white text-indigo-700 px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-50 transition-colors shadow-lg">
@@ -83,29 +104,30 @@ export default function PathDetails() {
                   <div className="relative border-l-2 border-slate-100 ml-4 space-y-8 pb-4">
                     {modules.map((module, index) => {
                       const isNext = !module.completed && index === modules.findIndex(m => !m.completed);
+                      const isLocked = !module.completed && !isNext;
                       
                       return (
-                        <div key={module.id} className="relative pl-8 group">
+                        <div key={module.id} className={`relative pl-8 group ${isLocked ? 'opacity-50 grayscale' : ''}`} title={module.description}>
                           {/* Timeline Node */}
-                          <div className={`absolute -left-[17px] top-1 rounded-full border-4 border-white w-8 h-8 flex items-center justify-center z-10 transition-colors duration-300 ${
+                          <div className={`absolute -left-[17px] top-1/2 -mt-4 rounded-full border-4 border-white w-8 h-8 flex items-center justify-center z-10 transition-colors duration-300 ${
                             module.completed 
-                              ? 'bg-green-500' 
+                              ? 'bg-emerald-500' 
                               : isNext ? 'bg-blue-600 ring-4 ring-blue-100' : 'bg-slate-200'
                           }`}>
                             {module.completed && <Check className="w-4 h-4 text-white" />}
-                            {!module.completed && !isNext && <span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span>}
                             {isNext && <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>}
+                            {isLocked && <div className="w-2.5 h-2.5 rounded-full bg-slate-400"></div>}
                           </div>
 
-                          <div className={`bg-white border rounded-2xl p-6 transition-all duration-300 hover:shadow-md ${
-                            isNext ? 'border-blue-200 shadow-sm ring-1 ring-blue-50' : 'border-slate-100'
+                          <div className={`bg-white border rounded-2xl p-6 transition-all duration-300 ${
+                            isNext ? 'border-blue-400 shadow-xl ring-4 ring-blue-100/50 cursor-pointer hover:shadow-2xl scale-[1.02] transform' : (isLocked ? 'border-slate-100 bg-slate-50/50 pointer-events-none' : 'border-slate-100 cursor-pointer hover:shadow-md')
                           }`}>
                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                              <div>
+                              <div className="flex-grow">
                                 <div className="flex items-center gap-3 mb-2">
                                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Module {index + 1}</span>
                                   {module.completed && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full uppercase tracking-wider">
                                       Completed
                                     </span>
                                   )}
@@ -114,39 +136,69 @@ export default function PathDetails() {
                                       Up Next
                                     </span>
                                   )}
+                                  {isLocked && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                                      Locked
+                                    </span>
+                                  )}
                                 </div>
-                                <h3 className={`text-xl font-bold mb-2 ${module.completed ? 'text-slate-800' : 'text-slate-900'}`}>
+                                <h3 className={`text-xl font-bold mb-2 ${module.completed ? 'text-slate-800' : (isLocked ? 'text-slate-500' : 'text-slate-900')}`}>
                                   {module.title}
                                 </h3>
-                                <p className="text-slate-600 text-sm leading-relaxed mb-4">
-                                  {module.description}
-                                </p>
                                 
-                                <div className="flex items-center gap-6">
-                                  <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                    <Clock className="w-4 h-4" />
-                                    {module.duration}
-                                  </div>
-                                  <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                    <Video className="w-4 h-4" />
-                                    12 video lessons
+                                {/* Expanded description display */}
+                                <div className="mt-4 pt-4 border-t border-slate-100">
+                                  <p className="text-slate-600 text-sm leading-relaxed mb-4">
+                                    {module.description}
+                                  </p>
+                                  
+                                  <div className="flex items-center gap-6">
+                                    <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+                                        <Clock className="w-4 h-4" />
+                                      </div>
+                                      {module.duration}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+                                        <Video className="w-4 h-4" />
+                                      </div>
+                                      {module.lessons} total lessons
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                               
-                              <div className="flex-shrink-0 mt-4 md:mt-0">
+                              <div className="flex-shrink-0 mt-4 md:mt-0 pt-1 flex flex-col gap-2">
                                 {isNext ? (
-                                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-2">
-                                    <PlayCircle className="w-4 h-4" />
-                                    Start Module
-                                  </button>
+                                  <>
+                                    <button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center justify-center gap-2">
+                                      <PlayCircle className="w-4 h-4" />
+                                      Start Module
+                                    </button>
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); toggleModuleCompletion(module.id); }}
+                                      className="w-full md:w-auto bg-white hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border border-slate-200 flex items-center justify-center gap-2"
+                                    >
+                                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                      Mark Completed
+                                    </button>
+                                  </>
                                 ) : module.completed ? (
-                                  <button className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-bold transition-all">
-                                    Review
-                                  </button>
+                                  <>
+                                    <button className="w-full md:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-bold transition-all w-full md:w-[160px]">
+                                      Review
+                                    </button>
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); toggleModuleCompletion(module.id); }}
+                                      className="w-full md:w-auto text-slate-400 hover:text-slate-600 px-5 py-2 text-xs font-medium transition-all"
+                                    >
+                                      Undo Completion
+                                    </button>
+                                  </>
                                 ) : (
-                                  <button className="bg-slate-50 text-slate-400 px-5 py-2.5 rounded-xl text-sm font-bold cursor-not-allowed">
-                                    Locked
+                                  <button className="w-full md:w-auto bg-slate-50 text-slate-400 px-5 py-2.5 rounded-xl text-sm font-bold cursor-not-allowed border border-slate-200 flex items-center justify-center gap-2">
+                                    <Lock className="w-4 h-4" /> Locked
                                   </button>
                                 )}
                               </div>
