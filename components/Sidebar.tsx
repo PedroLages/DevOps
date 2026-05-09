@@ -1,4 +1,4 @@
-import { Circle, LayoutGrid, BookOpen, Layers, BarChart2, Users, Book, Archive, MessageSquare, Settings } from 'lucide-react';
+import { Circle, LayoutGrid, BookOpen, Layers, BarChart2, Users, Book, Archive, MessageSquare, Settings, Map } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Sidebar({ activeRoute = '/paths' }: { activeRoute?: string }) {
@@ -13,8 +13,9 @@ export default function Sidebar({ activeRoute = '/paths' }: { activeRoute?: stri
       <nav className="flex flex-col gap-6 flex-grow">
         <NavItem href="/" icon={<LayoutGrid size={24} />} active={activeRoute === '/'} />
         <NavItem href="/courses" icon={<BookOpen size={24} />} active={activeRoute === '/courses'} />
-        <NavItem href="/" icon={<Layers size={24} />} active={activeRoute === '/paths'} />
+        <NavItem href="/paths" icon={<Layers size={24} />} active={activeRoute === '/paths'} />
         <NavItem href="/analytics" icon={<BarChart2 size={24} />} active={activeRoute === '/analytics'} />
+        <NavItem href="/knowledge-map" icon={<Map size={24} />} active={activeRoute === '/knowledge-map'} />
         <NavItem href="/team" icon={<Users size={24} />} active={activeRoute === '/team'} />
         <NavItem href="/library" icon={<Book size={24} />} active={activeRoute === '/library'} />
         <NavItem href="/archive" icon={<Archive size={24} />} active={activeRoute === '/archive'} />

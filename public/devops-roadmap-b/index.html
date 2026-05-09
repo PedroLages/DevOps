@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Roadmap - Edition B</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              neon: '#00f0ff',
+              darker: '#09090b',
+              dark: '#18181b',
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-darker antialiased min-h-screen flex text-slate-300">
+  
+  <!-- Sidebar B -->
+  <aside class="w-16 flex-shrink-0 border-r border-slate-800 bg-dark flex-col items-center py-6 gap-8 z-20 hidden md:flex h-screen sticky top-0">
+    <a href="/" class="mb-4 text-neon transition-opacity hover:opacity-80">
+      <i data-lucide="hexagon" class="w-8 h-8" stroke-width="2"></i>
+    </a>
+    
+    <nav class="flex flex-col gap-4 flex-grow w-full px-2">
+      <a href="/" class="p-3 w-full flex justify-center cursor-pointer rounded-lg transition-all text-slate-500 hover:text-neon hover:bg-slate-800/50"><i data-lucide="layout-grid" class="w-5 h-5"></i></a>
+      <a href="/courses" class="p-3 w-full flex justify-center cursor-pointer rounded-lg transition-all text-slate-500 hover:text-neon hover:bg-slate-800/50"><i data-lucide="book-open" class="w-5 h-5"></i></a>
+      <a href="/paths" class="p-3 w-full flex justify-center cursor-pointer rounded-lg transition-all text-darker bg-neon shadow-[0_0_15px_rgba(0,240,255,0.4)]"><i data-lucide="git-branch" class="w-5 h-5"></i></a>
+      <a href="/analytics" class="p-3 w-full flex justify-center cursor-pointer rounded-lg transition-all text-slate-500 hover:text-neon hover:bg-slate-800/50"><i data-lucide="activity" class="w-5 h-5"></i></a>
+    </nav>
+  </aside>
+
+  <main class="flex-grow flex flex-col min-w-0 min-h-screen">
+    
+    <!-- Topbar -->
+    <header class="h-16 bg-dark/80 backdrop-blur-md border-b border-slate-800 px-6 sm:px-8 lg:px-12 flex items-center justify-between sticky top-0 z-30">
+      <div class="flex items-center gap-4">
+        <span class="font-bold text-sm tracking-widest uppercase text-white font-mono flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-neon animate-pulse"></span>
+          Terminal mode
+        </span>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <button class="p-2 text-slate-400 hover:text-neon rounded-full transition-colors relative">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+        </button>
+        <button class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-800 hover:border-neon/50 bg-dark transition-all">
+          <img src="https://picsum.photos/seed/user/100/100" class="w-6 h-6 rounded-full object-cover grayscale opacity-80">
+          <span class="text-xs font-mono text-slate-300">pedro_dev</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="flex-grow overflow-y-auto">
+      <!-- Minimal Hero -->
+      <div class="px-8 lg:px-12 pt-12 pb-8 max-w-5xl mx-auto">
+        <div class="flex items-center gap-3 mb-6">
+          <a href="/paths" class="text-slate-500 hover:text-neon text-sm font-mono flex items-center gap-2 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> ~/paths
+          </a>
+        </div>
+        
+        <h1 class="text-5xl lg:text-6xl font-bold tracking-tighter text-white mb-6 font-sans">
+          DevOps <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon to-blue-500">Roadmap</span>
+        </h1>
+        <p class="text-slate-400 text-lg max-w-2xl font-mono leading-relaxed mb-10">
+          > initialized sequence: 4 critical modules.<br>
+          > objective: master infrastructure, CI/CD, and kubernetes scaling.
+        </p>
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-1 bg-dark rounded-xl border border-slate-800">
+          <div class="px-6 py-4 flex flex-col justify-center">
+            <span class="text-xs text-slate-500 font-mono uppercase mb-1">Time Req</span>
+            <span class="text-white font-medium text-lg flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-neon"></i> 14h 45m</span>
+          </div>
+          <div class="px-6 py-4 flex flex-col justify-center border-l border-slate-800">
+            <span class="text-xs text-slate-500 font-mono uppercase mb-1">Progress</span>
+            <span class="text-white font-medium text-lg flex items-center gap-2"><i data-lucide="battery-charging" class="w-4 h-4 text-neon"></i> <span id="progress-val">0</span>%</span>
+          </div>
+          <div class="px-6 py-4 flex flex-col justify-center border-l border-slate-800">
+            <span class="text-xs text-slate-500 font-mono uppercase mb-1">Status</span>
+            <span class="text-neon font-mono text-sm tracking-wider flex items-center gap-2 px-2 py-1 bg-neon/10 rounded w-fit">ACTIVE</span>
+          </div>
+          <div class="px-6 py-4 flex flex-col justify-center border-l border-slate-800">
+            <button class="w-full h-full bg-slate-800 hover:bg-neon hover:text-darker text-white transition-all rounded-lg font-bold text-sm tracking-wide" id="start-btn">
+              EXECUTE
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modules Area -->
+      <div class="max-w-5xl mx-auto px-8 lg:px-12 pb-20">
+        
+        <div class="flex items-center gap-4 mb-8 mt-4">
+          <div class="h-px bg-slate-800 flex-grow"></div>
+          <span class="text-xs font-mono text-slate-500">// SYSTEM_MODULES</span>
+          <div class="h-px bg-slate-800 flex-grow"></div>
+        </div>
+
+        <div class="space-y-6" id="modules-container">
+          <!-- Populated by JS -->
+        </div>
+
+      </div>
+    </div>
+  </main>
+  
+  <script src="script.js"></script>
+</body>
+</html>

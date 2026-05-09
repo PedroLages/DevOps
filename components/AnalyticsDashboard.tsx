@@ -17,11 +17,11 @@ const learningActivityData = [
 ];
 
 const categoryData = [
-  { name: 'DevOps', value: 45 },
-  { name: 'Frontend', value: 30 },
-  { name: 'Backend', value: 80 },
-  { name: 'Design', value: 20 },
-  { name: 'Data', value: 55 },
+  { name: 'DevOps', completed: 14 },
+  { name: 'Frontend', completed: 25 },
+  { name: 'Backend', completed: 18 },
+  { name: 'Design', completed: 8 },
+  { name: 'Data', completed: 12 },
 ];
 
 export default function AnalyticsDashboard() {
@@ -110,8 +110,8 @@ export default function AnalyticsDashboard() {
         {/* Secondary Chart */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <div className="mb-8">
-            <h2 className="text-lg font-bold font-heading text-slate-900">Top Categories</h2>
-            <p className="text-sm text-slate-500 font-medium mt-1">Time distribution by topic</p>
+            <h2 className="text-lg font-bold font-heading text-slate-900">Course Completion</h2>
+            <p className="text-sm text-slate-500 font-medium mt-1">Completion by category</p>
           </div>
           
           <div className="h-[300px] w-full">
@@ -134,7 +134,7 @@ export default function AnalyticsDashboard() {
                   cursor={{ fill: '#F1F5F9' }}
                   contentStyle={{ borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="completed" radius={[4, 4, 0, 0]}>
                   {categoryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={index === 2 ? '#2563EB' : '#93C5FD'} />
                   ))}
